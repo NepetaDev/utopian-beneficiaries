@@ -6,15 +6,16 @@
 function beneficiaries(input) {
   var reMessage = /^(?:@utopian-bot !utopian)(.*?)$/g; // A regular expression for the entire message (including bot call).
   // Explanation: Find text that comes after @utopian-bot !utopian.
-  var reMentionList = /(?: @)(\w+)(?:(?::)(\d+\.?\d+)(?:\%))?/g; // A regular expression for just the mention list. Mentions are formatted like this: @{username}[:{weight}%]
+  var reMentionList = /(?: @)(\w+)(?:(?::)(\d+(?:\.\d+)?)(?:\%))?/g; // A regular expression for just the mention list. Mentions are formatted like this: @{username}[:{weight}%]
   /* Explanation:
   (?: @) - non-capturing group (doesn't appear in matches): check for " @"; required
   (\w+) - capturing group, alphanumeric characters: the username; required -- matches[1]
   (?:(?::)(\d+)(?:\%))? - non-capturing group, weight in the format of ":{weight}%"; optional
     (?::) - non-capturing group, the character ":"; required for the optional group to match
-    (\d+\.?\d+) - capturing group, decimal value, the weight; required for the optional group to match -- matches[2]
+    (\d+(?:\.\d+)?) - capturing group, decimal value, the weight; required for the optional group to match -- matches[2]
     (?:\%) - non-capturing group, the character "%", required for the optional group to match
   */
+  const MAX_MENTIONS = 8;
   var users = {}; // A temporary JS object with the users.
   var sum = 0; // Sum of the weights (applies only when usersWithWeightsArePresent is set to true).
   var usersWithWeightsArePresent = false; // Mode flag.
@@ -30,28 +31,20 @@ function beneficiaries(input) {
     let totalLength = 0; // Total length of the correct mention list, used to compare with the total length of the mention list to check for any unrelated text being present.
 
     // Match all correct mentions until there are no more.
-    while (true) {
-      matches = reMentionList.exec(mentionList);
-      if (!matches) break;
+    while (matches = reMentionList.exec(mentionList)) {
       if (matches.length != 3) throw 'The text is not properly formatted.';
+      let [element, username, weight] = matches;
 
-      let element = matches[0];
-      let username = matches[1];
-      let weight = matches[2];
-      
       totalLength += element.length; // Increase the total length of the correct mention list.
-      if (Object.keys(users).includes(username)) throw 'One username can only appear once.';
-      if (Object.keys(users).length >= 8) throw 'The maximum number of mentioned users is 8.';
+      if (Object.keys(users).includes(username)) throw 'One username can only appear once.'; // Duplicate check.
+      if (Object.keys(users).length >= MAX_MENTIONS) throw 'The maximum number of mentioned users is ' + MAX_MENTIONS + '.';
       
       // Check if the mention we're parsing currently contains a weight.
       if (weight) {
         // Check if the weight is a positive number.
         if (isNaN(weight) || weight < 0) throw 'The text is not properly formatted.';
-        weight = parseFloat(weight); // Cast the String to float to avoid calculation errors.
-
         usersWithWeightsArePresent = true; // Set the mode flag.
-        users[username] = weight;
-        sum += weight;
+        sum += users[username] = parseFloat(weight); // Cast the String to float to avoid calculation errors.
       } else {
         usersWithoutWeightsArePresent = true; // Set the mode flag.
         users[username] = null;
@@ -70,16 +63,12 @@ function beneficiaries(input) {
   var weight = null;
   var count = Object.keys(users).length;
   
-  // The mention list is in the following format: @u1 @u2 @u3
+  // If the mention list is in the following format: @u1 @u2 @u3
   if (usersWithoutWeightsArePresent && count > 0) weight = 100/count; // Calculate the common weight.
 
   return {
     // Convert our temporary array to match the required format.
-    beneficiaries: Object.keys(users).map((user) => {
-      var obj = {};
-      obj[user] = (weight) ? weight : users[user];
-      return obj;
-    })
+    beneficiaries: Object.keys(users).map((user) => ({ [user]: (users[user]) ? users[user] : weight }))
   };
 }
 
