@@ -24,9 +24,7 @@ function beneficiaries(input) {
   matches = reMessage.exec(input);
   
   // Check if the bot call is present and throw an error if it's not.
-  if (!matches || matches.length != 2) {
-    throw 'The text is not properly formatted.';
-  }
+  if (!matches || matches.length != 2) throw 'The text is not properly formatted.';
 
   // Check if a mention list is present.
   if (matches[1]) {
@@ -69,35 +67,21 @@ function beneficiaries(input) {
   if (usersWithWeightsArePresent && usersWithoutWeightsArePresent) throw 'Mixed input formats are not allowed.';
   if (usersWithWeightsArePresent && sum != 100) throw 'The sum of weight should be exactly 100.';
 
-  // Return data.
-  if (usersWithWeightsArePresent) { // The mention list is in the following format: @u1:15 @u2:35 @u3:25 @u4:25
-    return {
-      // Convert our temporary array to match the required format.
-      beneficiaries: Object.keys(users).map((user) => {
-        var obj = {};
-        obj[user] = users[user];
-        return obj;
-      })
-    };
-  } else { // The mention list is in the following format: @u1 @u2 @u3 @u4 (or there is no mention list).
-    var count = Object.keys(users).length;
-    if (count > 0) {
-      var weight = 100/count; // Calculate the weight.
-      return {
-        // Convert our temporary array to match the required format.
-        beneficiaries: Object.keys(users).map((user) => {
-          var obj = {};
-          obj[user] = weight;
-          return obj;
-        })
-      };
-    } else {
-      return {
-        // No beneficiaries.
-        beneficiaries: []
-      };
-    }
-  }
+  // Prepare to return data.
+  var weight = null;
+  var count = Object.keys(users).length;
+  
+  // The mention list is in the following format: @u1 @u2 @u3
+  if (usersWithoutWeightsArePresent && count > 0) weight = 100/count; // Calculate the common weight.
+
+  return {
+    // Convert our temporary array to match the required format.
+    beneficiaries: Object.keys(users).map((user) => {
+      var obj = {};
+      obj[user] = (weight) ? weight : users[user];
+      return obj;
+    })
+  };
 }
 
 module.exports = beneficiaries;
