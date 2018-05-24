@@ -4,8 +4,8 @@
  * @returns A JS object containing a beneficiaries key with an array of JS objects containing exactly one key (username) and one value (weight).
  */
 function beneficiaries(input) {
-  var reMessage = /^(@utopian-bot !utopian)(.*?)$/g; // A regular expression for the entire message (including bot call).
-  // Explanation: Find text that starts with @utopian-bot !utopian.
+  var reMessage = /^(?:@utopian-bot !utopian)(.*?)$/g; // A regular expression for the entire message (including bot call).
+  // Explanation: Find text that comes after @utopian-bot !utopian.
   var reMentionList = /(?: @)(\w+)(?:(?::)(\d+)(?:\%))?/g; // A regular expression for just the mention list. Mentions are formatted like this: @{username}[:{weight}%]
   /* Explanation:
   (?: @) - non-capturing group (doesn't appear in matches): check for " @"; required
@@ -24,11 +24,11 @@ function beneficiaries(input) {
   matches = reMessage.exec(input);
   
   // Check if the bot call is present and throw an error if it's not.
-  if (matches && matches.length == 3) {
+  if (matches && matches.length == 2) {
     // Check if a mention list is present.
-    if (matches[2]) {
+    if (matches[1]) {
       var totalLength = 0; // Total length of the correct mention list, used to compare with the total length of the mention list to check for any unrelated text being present.
-      var str = matches[2]; // Mention list (including malformed mentions).
+      var str = matches[1]; // Mention list (including malformed mentions).
 
       // Match all correct mentions until there are no more.
       while (true) {
