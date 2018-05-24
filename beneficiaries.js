@@ -32,7 +32,6 @@ function beneficiaries(input) {
         if (totalLength > 0) throw 'The text is not properly formatted.'; // This means that there are mentions with no weight attached somewhere, and we're trying to attach a weight now (or vice versa).
         automaticallyCalculateWeights = false; // Change the mode. It can only change to false, a change from true to false and then back to true would trigger the above condition anyway.
       }
-      
       totalLength += element.length; // Increase the total length of the correct mention list.
       if (Object.keys(users).includes(username)) throw 'One username can only appear once.'; // Duplicate check.
       if (Object.keys(users).length >= MAX_MENTIONS) throw 'The maximum number of mentioned users is ' + MAX_MENTIONS + '.';
@@ -41,15 +40,14 @@ function beneficiaries(input) {
 
     // Compare the lengths. If they don't match then there are extra characters in the mention list string.
     if (totalLength != mentionList.length) throw 'The text is not properly formatted.';
+    // Check weight sum if we're not using automatic weight calculation.
+    if (!automaticallyCalculateWeights && weightSum != 100) throw 'The sum of weights should be exactly 100.';
   }
   
-  // Check weight sum if we're not using automatical weight calculation.
-  if (!automaticallyCalculateWeights && weightSum != 100) throw 'The sum of weights should be exactly 100.';
-
   var usernames = Object.keys(users); // Get an array of the mentioned usernames.
-  var weight = (usernames.length > 0) ? 100/usernames.length : null; // Calculate the weight.
+  var weight = 100/usernames.length; // Calculate the weight. We can avoid an if here too, division by zero doesn't throw an exception in JS.
   return { // Convert our temporary array to match the required format.
-    beneficiaries: usernames.map((username) => ({ [username]: (!automaticallyCalculateWeights) ? users[username] : weight }))
+    beneficiaries: usernames.map((username) => ({ [username]: users[username] || weight }))
   };
 }
 
