@@ -14,6 +14,19 @@ test('call with beneficiaries with weights returns the provided weights: @utopia
   expect(map).toEqual([15, 35, 25, 25]);
 });
 
+test('call with beneficiaries with decimal value weights returns the provided weights: @utopian-bot !utopian @u1:50.5% @u2:49.5%', () => {
+  var map = beneficiaries('@utopian-bot !utopian @u1:50.5% @u2:49.5%').beneficiaries.map((beneficiary) => beneficiary[Object.keys(beneficiary)[0]]);
+  expect(map).toEqual([50.5, 49.5]);
+});
+
+test('call with beneficiaries with malformed decimal value weights throws: @utopian-bot !utopian @u1:50..5% @u2:49.5%', () => {
+  expect(() => beneficiaries('@utopian-bot !utopian @u1:50..5% @u2:49.5%')).toThrow('The text is not properly formatted.');
+});
+
+test('call with beneficiaries with malformed decimal value weights throws: @utopian-bot !utopian @u1:50.% @u2:49.5%', () => {
+  expect(() => beneficiaries('@utopian-bot !utopian @u1:50.% @u2:49.5%')).toThrow('The text is not properly formatted.');
+});
+
 test('call with beneficiaries with weights that do not sum to 100 throws: @utopian-bot !utopian @u1:15% @u2:75% @u3:25% @u4:25%', () => {
   expect(() => beneficiaries('@utopian-bot !utopian @u1:15% @u2:75% @u3:25% @u4:25%')).toThrow('The sum of weights should be exactly 100.');
 });

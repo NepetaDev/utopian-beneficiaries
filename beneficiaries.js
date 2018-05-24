@@ -6,13 +6,13 @@
 function beneficiaries(input) {
   var reMessage = /^(?:@utopian-bot !utopian)(.*?)$/g; // A regular expression for the entire message (including bot call).
   // Explanation: Find text that comes after @utopian-bot !utopian.
-  var reMentionList = /(?: @)(\w+)(?:(?::)(\d+)(?:\%))?/g; // A regular expression for just the mention list. Mentions are formatted like this: @{username}[:{weight}%]
+  var reMentionList = /(?: @)(\w+)(?:(?::)(\d+\.?\d+)(?:\%))?/g; // A regular expression for just the mention list. Mentions are formatted like this: @{username}[:{weight}%]
   /* Explanation:
   (?: @) - non-capturing group (doesn't appear in matches): check for " @"; required
   (\w+) - capturing group, alphanumeric characters: the username; required -- matches[1]
   (?:(?::)(\d+)(?:\%))? - non-capturing group, weight in the format of ":{weight}%"; optional
     (?::) - non-capturing group, the character ":"; required for the optional group to match
-    (\d+) - capturing group, numeric characters, the weight; required for the optional group to match -- matches[2]
+    (\d+\.?\d+) - capturing group, decimal value, the weight; required for the optional group to match -- matches[2]
     (?:\%) - non-capturing group, the character "%", required for the optional group to match
   */
   var users = {}; // A temporary JS object with the users.
