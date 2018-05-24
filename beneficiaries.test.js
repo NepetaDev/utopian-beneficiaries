@@ -19,8 +19,16 @@ test('call with beneficiaries with decimal value weights returns the provided we
   expect(map).toEqual([50.5, 49.5]);
 });
 
-test('call with beneficiaries with malformed decimal value weights throws: @utopian-bot !utopian @u1:50..5% @u2:49.5%', () => {
+test('call with beneficiaries with malformed decimal value weights throws: @utopian-bot !utopian @u1:50..5% @u2:49..5%', () => {
   expect(() => beneficiaries('@utopian-bot !utopian @u1:50..5% @u2:49.5%')).toThrow('The text is not properly formatted.');
+});
+
+test('call with beneficiaries with mixed weights throws: @utopian-bot !utopian @u1:50% @u2', () => {
+  expect(() => beneficiaries('@utopian-bot !utopian @u1:50% @u2')).toThrow('The text is not properly formatted.');
+});
+
+test('call with beneficiaries with mixed weights throws: @utopian-bot !utopian @u1 @u2:50%', () => {
+  expect(() => beneficiaries('@utopian-bot !utopian @u1 @u2:50%')).toThrow('The text is not properly formatted.');
 });
 
 test('call with beneficiaries with malformed decimal value weights throws: @utopian-bot !utopian @u1:50.% @u2:49.5%', () => {
@@ -31,11 +39,11 @@ test('call with beneficiaries with weights that do not sum to 100 throws: @utopi
   expect(() => beneficiaries('@utopian-bot !utopian @u1:15% @u2:75% @u3:25% @u4:25%')).toThrow('The sum of weights should be exactly 100.');
 });
 
-test('call with beneficiaries with weights are not numbers throws: @utopian-bot !utopian @u1:a% @u2:x% @u3:25% @u4:25%', () => {
+test('call with beneficiaries with weights that are not numbers throws: @utopian-bot !utopian @u1:a% @u2:x% @u3:25% @u4:25%', () => {
   expect(() => beneficiaries('@utopian-bot !utopian @u1:a% @u2:x% @u3:25% @u4:25%')).toThrow('The text is not properly formatted.');
 });
 
-test('call with beneficiaries with weights are not positive throws: @utopian-bot !utopian @u1:-10% @u2:60% @u3:25% @u4:25%', () => {
+test('call with beneficiaries with weights that are not positive throws: @utopian-bot !utopian @u1:-10% @u2:60% @u3:25% @u4:25%', () => {
   expect(() => beneficiaries('@utopian-bot !utopian @u1:-10% @u2:60% @u3:25% @u4:25%')).toThrow('The text is not properly formatted.');
 });
 
