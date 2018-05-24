@@ -23,7 +23,7 @@ function beneficiaries(input) {
   var matches = reMessage.exec(input); // Temporary array of regex matches.
   
   // Check if the bot call is present and throw an error if it's not.
-  if (!matches || matches.length != 2) throw 'The text is not properly formatted.';
+  if (!matches) throw 'The text is not properly formatted.';
 
   // Check if a mention list is present.
   var mentionList = matches[1]; // Mention list (including malformed mentions).
@@ -32,7 +32,6 @@ function beneficiaries(input) {
 
     // Match all correct mentions until there are no more.
     while (matches = reMentionList.exec(mentionList)) {
-      if (matches.length != 3) throw 'The text is not properly formatted.';
       let [element, username, weight] = matches;
 
       totalLength += element.length; // Increase the total length of the correct mention list.
@@ -41,8 +40,6 @@ function beneficiaries(input) {
       
       // Check if the mention we're parsing currently contains a weight.
       if (weight) {
-        // Check if the weight is a positive number.
-        if (isNaN(weight) || weight < 0) throw 'The text is not properly formatted.';
         usersWithWeightsArePresent = true; // Set the mode flag.
         sum += users[username] = parseFloat(weight); // Cast the String to float to avoid calculation errors.
       } else {
@@ -59,16 +56,12 @@ function beneficiaries(input) {
   if (usersWithWeightsArePresent && usersWithoutWeightsArePresent) throw 'Mixed input formats are not allowed.';
   if (usersWithWeightsArePresent && sum != 100) throw 'The sum of weights should be exactly 100.';
 
-  // Prepare to return data.
-  var weight = null;
-  var count = Object.keys(users).length;
-  
-  // If the mention list is in the following format: @u1 @u2 @u3
-  if (usersWithoutWeightsArePresent && count > 0) weight = 100/count; // Calculate the common weight.
+  var usernames = Object.keys(users); // Get an array of the mentioned usernames.
+  var weight = (usernames.length > 0) ? 100/usernames.length : null; // Calculate the weight.
 
   return {
     // Convert our temporary array to match the required format.
-    beneficiaries: Object.keys(users).map((user) => ({ [user]: (users[user]) ? users[user] : weight }))
+    beneficiaries: usernames.map((username) => ({ [username]: (users[username]) ? users[username] : weight }))
   };
 }
 
