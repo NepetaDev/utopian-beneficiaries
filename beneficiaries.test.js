@@ -19,6 +19,11 @@ test('call with beneficiaries with decimal value weights returns the provided we
   expect(map).toEqual([50.5, 49.5]);
 });
 
+test('call with beneficiaries with no value weights returns the provided weights: @utopian-bot !utopian @u1:0% @u2:100%', () => {
+  var map = beneficiaries('@utopian-bot !utopian @u1:0% @u2:100%').beneficiaries.map((beneficiary) => beneficiary[Object.keys(beneficiary)[0]]);
+  expect(map).toEqual([0, 100]);
+});
+
 test('call with beneficiaries with malformed decimal value weights throws: @utopian-bot !utopian @u1:50..5% @u2:49..5%', () => {
   expect(() => beneficiaries('@utopian-bot !utopian @u1:50..5% @u2:49.5%')).toThrow('The text is not properly formatted.');
 });

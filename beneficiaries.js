@@ -45,7 +45,7 @@ function beneficiaries(input) {
   }
   
   var usernames = Object.keys(users); // Get an array of the mentioned usernames.
-  var weight = 100/usernames.length; // Calculate the weight. We can avoid an if here too, division by zero doesn't throw an exception in JS.
+  var weight = (automaticallyCalculateWeights) ? 100/usernames.length : 0; // Calculate the weight.
   return { // Convert our temporary array to match the required format.
     beneficiaries: usernames.map((username) => ({ [username]: users[username] || weight }))
   };
